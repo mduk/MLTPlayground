@@ -1,0 +1,150 @@
+#!/bin/bash
+
+
+declare -r fps=30
+
+
+
+################################################################################
+
+
+declare -r prefix="$1"
+declare -a clips=()
+
+tag() {
+  declare -r name="$1"; shift
+  declare -A attributes=()
+  declare -A properties=()
+
+  while [[ $# -gt 0 ]]
+  do
+    if [[ $1 == @* ]]
+    then attributes[${1#@}]="$2"
+    else properties[$1]="$2"
+    fi
+    shift
+    shift
+  done
+
+  echo -n "<$name"
+  if [[ ${#attributes[@]} -gt 0 ]]
+  then
+    for attr in "${!attributes[@]}"
+    do echo -n " ${attr}=\"${attributes[$attr]}\""
+    done
+  fi
+
+  if [[ ${#properties[@]} -eq 0 ]]
+  then echo '/>'
+  else echo '>'
+  fi
+
+  for prop in "${!properties[@]}"
+  do echo "<property name=\"$prop\">${properties[$prop]}</property>"
+  done
+
+  if [[ ${#properties[@]} -gt 0 ]]
+  then echo "</$name>"
+  fi
+}
+
+for file in ${CAMERA_DIR:-$HOME/Camera}/$prefix*.mp4
+do clips+=($file)
+done
+unset file
+
+echo "<?xml version='1.0' encoding='utf-8'?>"
+echo '<mlt version="6.6.0">'
+
+tag profile \
+  @width 1920 \
+  @height 1080 \
+  @frame_rate_den 1 \
+  @display_aspect_num 16 \
+  @display_aspect_den 9 \
+  @frame_rate_num 25 \
+  @colorspace 709 \
+  @sample_aspect_den 1 \
+  @description "blah" \
+  @progressive 1 \
+  @sample_aspect_num 1
+
+tag producer \
+  @id black \
+  mlt_service colour \
+  colour black
+
+declare -i clipn=0
+
+for clip in "${clips[@]}"
+do
+  ((clipn++))
+
+  tag producer \
+    @id "clip${clipn}" \
+    mlt_service avformat \
+    resource "$clip"
+done
+
+echo '<playlist>'
+
+declare -i clipn=0
+declare    lastdate=''
+
+for clip in "${clips[@]}"
+do
+  ((clipn++))
+
+  read year month day _ < <( \
+    exiftool "$clip" -json \
+      | jq -r '.[0].CreateDate' \
+      | tr ':' ' '
+  )
+
+  declare clipdate="$year/$month/$day"
+
+  read dayname monthname < <( \
+    date --date="$clipdate" +'%A %B'
+  )
+
+  case "$day" in
+    1) declare th='st' ;;
+    2) declare th='nd' ;;
+    3) declare th='rd' ;;
+    *) declare th='th' ;;
+  esac
+
+  if [[ $clipdate != $lastdate ]]
+  then
+    echo "<entry producer=\"black\" out=\"$((fps*2))\">"
+    tag filter \
+      mlt_service watermark \
+      resource "+${dayname} ${day}${th}~${monthname} ${year}.txt" \
+      composite.halign centre \
+      composite.valign middle \
+      producer.size 96 \
+      producer.align centre \
+      producer.fgcolour 0xffffffff \
+      producer.bgcolour 0x000000ff \
+      producer.family Courier \
+      producer.weight 800
+    echo "</entry>"
+
+    lastdate="$clipdate"
+  fi
+
+  echo "<entry producer=\"clip${clipn}\">"
+  tag filter \
+    mlt_service dynamictext \
+    argument "$clipdate" \
+    family Courier \
+    size 32 \
+    weight 800 \
+    fgcolour 0xffffffff \
+    bgcolour 0x000000ff \
+    pad 4
+  echo '</entry>'
+done
+echo '</playlist>'
+
+echo '</mlt>'
