@@ -46,7 +46,7 @@
   <!--
        60 frames of video (000:060)
        60 frames of blank (061:120)
-       60 frames of video (121:   )
+       resume video       (121:   )
   -->
   <playlist id="screen_t">
     <entry producer="screen_p" out="60"/>
