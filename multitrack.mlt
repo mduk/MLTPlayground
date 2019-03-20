@@ -56,6 +56,12 @@
       <track producer="camera_t"/>
       <track producer="screen_t"/>
     </multitrack>
+    <filter>
+      <property name="mlt_service">dynamictext</property>
+      <property name="fgcolour">white</property>
+      <property name="bgcolour">black</property>
+      <property name="argument">#frame#</property>
+    </filter>
   </tractor>
 
 
