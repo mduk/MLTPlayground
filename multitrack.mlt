@@ -43,8 +43,13 @@
     </entry>
   </playlist>
 
+  <!--
+       60 frames of video (000:060)
+       60 frames of blank (061:120)
+       60 frames of video (121:   )
+  -->
   <playlist id="screen_t">
-    <entry producer="screen_p" in="0" out="60"/>
+    <entry producer="screen_p" out="60"/>
     <blank length="60"/>
     <entry producer="screen_p" in="120"/>
   </playlist>
@@ -53,15 +58,33 @@
 
   <tractor>
     <multitrack>
-      <track producer="camera_t"/>
-      <track producer="screen_t"/>
+      <track producer="camera_t"/> <!-- Hidden by screen_t -->
+      <track producer="screen_t"/> <!-- Visible -->
     </multitrack>
+
+    <!-- Show the frame count in the corner -->
     <filter>
       <property name="mlt_service">dynamictext</property>
       <property name="fgcolour">white</property>
       <property name="bgcolour">black</property>
       <property name="argument">#frame#</property>
     </filter>
+
+    <!-- Fade from t1 (camera) to t0 (screen) -->
+    <!-- t0 (screen) blanks at frame 60 -->
+    <transition in="55" out="65">
+      <property name="a_track">1</property>
+      <property name="b_track">0</property>
+      <property name="mlt_service">luma</property>
+    </transition>
+
+    <!-- Fade from t0 (screen) to t1 (camera) -->
+    <!-- t0 (screen) unblanks at frame 120 -->
+    <transition in="115" out="125">
+      <property name="a_track">0</property>
+      <property name="b_track">1</property>
+      <property name="mlt_service">luma</property>
+    </transition>
   </tractor>
 
 
