@@ -40,18 +40,23 @@
   <playlist id="camera_t">
     <entry producer="camera_p">
       <filter><property name="mlt_service">rescale</property></filter>
+      <filter>
+        <property name="mlt_service">mirror</property>
+        <property name="mirror">flip</property>
+      </filter>
     </entry>
   </playlist>
 
-  <!--
-       60 frames of video (000:060)
-       60 frames of blank (061:120)
-       resume video       (121:   )
-  -->
   <playlist id="screen_t">
-    <entry producer="screen_p" out="60"/>
-    <blank length="60"/>
-    <entry producer="screen_p" in="120"/>
+    <entry producer="screen_p">
+      <filter><property name="mlt_service">rescale</property></filter>
+      <filter>
+        <property name="mlt_service">frei0r.alphagrad</property>
+        <property name="Position">0.62</property>
+        <property name="Transition width">0.1</property>
+        <property name="Tilt">0.76</property>
+      </filter>
+    </entry>
   </playlist>
 
 
@@ -70,21 +75,12 @@
       <property name="argument">#frame#</property>
     </filter>
 
-    <!-- Fade from t1 (camera) to t0 (screen) -->
-    <!-- t0 (screen) blanks at frame 60 -->
-    <transition in="55" out="65">
-      <property name="a_track">1</property>
-      <property name="b_track">0</property>
-      <property name="mlt_service">luma</property>
-    </transition>
-
-    <!-- Fade from t0 (screen) to t1 (camera) -->
-    <!-- t0 (screen) unblanks at frame 120 -->
-    <transition in="115" out="125">
+    <transition>
       <property name="a_track">0</property>
       <property name="b_track">1</property>
-      <property name="mlt_service">luma</property>
+      <property name="mlt_service">qtblend</property>
     </transition>
+
   </tractor>
 
 
