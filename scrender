@@ -1,0 +1,5 @@
+#!/bin/bash
+
+
+melt $HOME/Development/mduk/MLTPlayground/scrender.mlt \
+  -consumer avformat:output.mkv

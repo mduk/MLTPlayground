@@ -1,0 +1,19 @@
+#!/bin/bash
+
+declare camera="$(
+  for input in /sys/class/video4linux/*
+  do
+    read name < $input/name
+    read path < <(basename $input)
+    echo /dev/$path $name
+  done | sed -n '/[a-z\/]* .*C920/s///p'
+)"
+
+declare tmp="$(mktemp).mlt"
+
+sed "s|@camera|$camera|" \
+  <$HOME/Development/mduk/MLTPlayground/scpreview.mlt \
+  >$tmp
+
+set -x
+melt "$tmp"

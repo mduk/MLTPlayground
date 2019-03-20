@@ -1,0 +1,3 @@
+#!/bin/bash
+
+melt $HOME/Development/mduk/MLTPlayground/scplay.mlt
