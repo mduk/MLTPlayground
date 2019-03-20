@@ -17,11 +17,6 @@
 
 
 
-  <producer id="black">
-    <property name="mlt_service">colour</property>
-    <property name="colour">black</property>
-  </producer>
-
   <producer id="camera_p">
     <property name="mlt_service">avformat</property>
     <property name="resource">/home/daniel/Screencasts/latest.nut</property>
@@ -39,22 +34,26 @@
 
   <playlist id="camera_t">
     <entry producer="camera_p">
-      <filter><property name="mlt_service">rescale</property></filter>
+      <filter>
+        <property name="mlt_service">rescale</property>
+      </filter>
       <filter>
         <property name="mlt_service">mirror</property>
         <property name="mirror">flip</property>
+      </filter>
+      <filter>
+        <property name="mlt_service">frei0r.alphagrad</property>
+        <property name="Position">0.400</property>
+        <property name="Transition width">0.09</property>
+        <property name="Tilt">0.26</property>
       </filter>
     </entry>
   </playlist>
 
   <playlist id="screen_t">
     <entry producer="screen_p">
-      <filter><property name="mlt_service">rescale</property></filter>
       <filter>
-        <property name="mlt_service">frei0r.alphagrad</property>
-        <property name="Position">0.62</property>
-        <property name="Transition width">0.1</property>
-        <property name="Tilt">0.76</property>
+        <property name="mlt_service">rescale</property>
       </filter>
     </entry>
   </playlist>
@@ -63,17 +62,17 @@
 
   <tractor>
     <multitrack>
-      <track producer="camera_t"/> <!-- Hidden by screen_t -->
-      <track producer="screen_t"/> <!-- Visible -->
+      <track producer="screen_t"/>
+      <track producer="camera_t"/>
     </multitrack>
 
     <!-- Show the frame count in the corner -->
-    <filter>
+    <!-- filter>
       <property name="mlt_service">dynamictext</property>
       <property name="fgcolour">white</property>
       <property name="bgcolour">black</property>
       <property name="argument">#frame#</property>
-    </filter>
+    </filter-->
 
     <transition>
       <property name="a_track">0</property>
