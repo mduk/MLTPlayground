@@ -1,0 +1,170 @@
+#!/bin/bash
+
+tag() {
+  declare -r name="$1"; shift
+  declare -n array="$name"
+
+  declare -A attributes=()
+  declare -A properties=()
+
+  declare    tag="$name"
+
+  if [[ $name == *_* ]]
+  then
+    tag="${name#*_}"
+    attributes['id']="$name"
+  fi
+
+  for k in "${!array[@]}"
+  do
+    declare v="${array[$k]}"
+    if [[ $k == @* ]]
+    then attributes[${k#@}]="$v"
+    else properties[$k]="$v"
+    fi
+  done
+
+  echo -n "<$tag"
+  if [[ ${#attributes[@]} -gt 0 ]]
+  then
+    for attr in "${!attributes[@]}"
+    do echo -n " ${attr}=\"${attributes[$attr]}\""
+    done
+  fi
+
+  if [[ ${#properties[@]} -eq 0 ]]
+  then echo '/>'
+  else echo '>'
+  fi
+
+  for prop in "${!properties[@]}"
+  do echo "<property name=\"$prop\">${properties[$prop]}</property>"
+  done
+
+  if [[ ${#properties[@]} -gt 0 ]]
+  then echo "</$tag>"
+  fi
+}
+
+declare param_mode='play'
+declare param_scfile='/home/daniel/Screencasts/latest.nut'
+declare param_testcard='/home/daniel/Development/mduk/MLTPlayground/testcard.svg'
+declare param_camera='scfile'
+declare param_screen='scfile'
+declare param_gradient_position='0.4'
+declare param_gradient_width='0.09'
+declare param_gradient_tilt='0.26'
+source $HOME/Development/mduk/BashPlayground/advanced-argument-parser.sh
+source $HOME/Development/mduk/BashPlayground/var-dump.sh
+
+declare -A screen_producer=(
+  [mlt_service]='pixbuf'
+  [resource]="$param_testcard"
+)
+
+declare -A camera_producer=(
+  [mlt_service]='pixbuf'
+  [resource]="$param_testcard"
+)
+
+if [[ $param_camera != 'testcard' ]]
+then
+  camera_producer['mlt_service']='avformat'
+  camera_producer['resource']="$param_scfile"
+  camera_producer['video_index']='0'
+fi
+
+if [[ $param_screen != 'testcard' ]]
+then
+  screen_producer['mlt_service']='avformat'
+  screen_producer['resource']="$param_scfile"
+  screen_producer['video_index']='1'
+  screen_producer['audio_index']='-1'
+fi
+
+
+
+var_dump param_mode param_scfile param_testcard
+var_dump screen_producer camera_producer
+
+
+
+cat << EOF
+<?xml version="1.0" encoding="utf-8"?>
+<mlt version="6.6.0">
+EOF
+
+
+declare -A profile=(
+  [@width]='1920'
+  [@height]='1080'
+  [@frame_rate_den]='1'
+  [@display_aspect_num]='16'
+  [@display_aspect_den]='9'
+  [@frame_rate_num]='25'
+  [@colorspace]='709'
+  [@sample_aspect_den]='1'
+  [@progressive]='1'
+  [@sample_aspect_num]='1'
+)
+
+tag profile
+tag camera_producer
+tag screen_producer
+
+cat << EOF
+  <playlist id="screen_track">
+    <entry producer="screen_producer">
+      <filter>
+        <property name="mlt_service">rescale</property>
+      </filter>
+    </entry>
+  </playlist>
+
+  <playlist id="camera_track">
+    <entry producer="camera_producer">
+      <filter>
+        <property name="mlt_service">rescale</property>
+      </filter>
+      <filter>
+        <property name="mlt_service">mirror</property>
+        <property name="mirror">flip</property>
+      </filter>
+      <filter>
+        <property name="mlt_service">frei0r.alphagrad</property>
+        <property name="Position">${param_gradient_position}</property>
+        <property name="Transition width">${param_gradient_width}</property>
+        <property name="Tilt">${param_gradient_tilt}</property>
+      </filter>
+    </entry>
+  </playlist>
+
+  <tractor>
+    <multitrack>
+      <track producer="screen_track"/>
+      <track producer="camera_track"/>
+    </multitrack>
+EOF
+
+if [[ "$param_mode" != 'render' ]]
+then
+  cat << EOF
+    <filter>
+      <property name="mlt_service">dynamictext</property>
+      <property name="fgcolour">white</property>
+      <property name="bgcolour">black</property>
+      <property name="argument">#frame#</property>
+    </filter>
+EOF
+fi
+
+cat << EOF
+    <transition>
+      <property name="a_track">0</property>
+      <property name="b_track">1</property>
+      <property name="mlt_service">qtblend</property>
+    </transition>
+  </tractor>
+EOF
+
+echo '</mlt>'
