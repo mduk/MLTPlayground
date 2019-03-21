@@ -57,30 +57,59 @@ declare param_gradient_tilt='0.26'
 source $HOME/Development/mduk/BashPlayground/advanced-argument-parser.sh
 source $HOME/Development/mduk/BashPlayground/var-dump.sh
 
-declare -A screen_producer=(
-  [mlt_service]='pixbuf'
-  [resource]="$param_testcard"
-)
-
+declare -A screen_producer=()
 declare -A camera_producer=(
   [mlt_service]='pixbuf'
   [resource]="$param_testcard"
 )
 
-if [[ $param_camera != 'testcard' ]]
-then
-  camera_producer['mlt_service']='avformat'
-  camera_producer['resource']="$param_scfile"
-  camera_producer['video_index']='0'
-fi
+case "$param_camera" in
 
-if [[ $param_screen != 'testcard' ]]
-then
-  screen_producer['mlt_service']='avformat'
-  screen_producer['resource']="$param_scfile"
-  screen_producer['video_index']='1'
-  screen_producer['audio_index']='-1'
-fi
+  scfile)
+    camera_producer[mlt_service]='avformat'
+    camera_producer[resource]="$param_scfile"
+    camera_producer[video_index]='0'
+    ;;
+
+  testcard)
+    camera_producer[mlt_service]='pixbuf'
+    camera_producer[resource]="$param_testcard"
+    ;;
+
+  /dev/video*)
+    camera_producer[mlt_service]='avformat'
+    camera_producer[resource]="$param_camera"
+    ;;
+
+  *)
+    echo "Unknown value for param_camera: $param_camera" >&2
+    exit 1
+
+esac
+
+case $param_screen in
+  scfile)
+    screen_producer[mlt_service]='avformat'
+    screen_producer[resource]="$param_scfile"
+    screen_producer[video_index]='1'
+    screen_producer[audio_index]='-1'
+    ;;
+
+  testcard)
+    screen_producer[mlt_service]='pixbuf'
+    screen_producer[resource]="$param_testcard"
+    ;;
+
+  X11:*)
+    screen_producer[mlt_service]='avformat'
+    screen_producer[resource]='x11grab::0.0?height=1080&amp;width=1920'
+    screen_producer[draw_mouse]=1
+    ;;
+
+  *)
+    echo "Unknown value for param_screen: $param_screen" >&2
+    exit 1
+esac
 
 
 
