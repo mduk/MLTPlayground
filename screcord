@@ -11,6 +11,13 @@ declare preferred_camera="$(
   done | sed -n '/[a-z\/]* .*C920/s///p'
 )"
 
+declare -A camera_options=(
+  [power_line_frequency]=2
+  [focus_auto]=0
+  [exposure_auto_priority]=0
+  [white_balance_temperature_auto]=0
+)
+
 declare -ir thread_queue_size=512
 declare -ir fps=30
 declare -r  delay=0.4
@@ -20,6 +27,7 @@ declare -r  filename_format='%Y-%m-%d-%H-%M-%S'
 # Here there be Dragons
 ################################################################################
 
+# Screen geometry
 read w h x y < <(
   xrandr | sed -nr "
     /${output} connected/{
@@ -42,6 +50,8 @@ echo "Recording output: ${output}"
 echo "      Resolution: ${w}x${h}"
 echo "        Position: ${x}x${y}"
 
+
+# Camera setup
 if [[ -r "$preferred_camera" ]]
 then
   declare -r camera="$preferred_camera"
@@ -52,6 +62,8 @@ fi
 
 echo "Recording Camera: ${camera}"
 
+
+# Output configuration
 case "$profile" in
   nut)
     declare -r vcodec='copy'
@@ -74,6 +86,16 @@ esac
 ################################################################################
 # Here there be Cthulu
 ################################################################################
+
+for k in "${!camera_options[@]}"
+do
+  declare v="${camera_options[$k]}"
+
+  if v4l2-ctl -d "$camera" -C "$k" --silent
+  then v4l2-ctl -d "$camera" -c "$k=$v" --silent
+  else echo "Camera doesn't have option: $k" >&2
+  fi
+done
 
 declare -r tqs="-thread_queue_size ${thread_queue_size}"
 declare -r fr="-framerate ${fps}"
