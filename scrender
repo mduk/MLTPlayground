@@ -2,4 +2,4 @@
 
 
 melt $HOME/Development/mduk/MLTPlayground/scrender.mlt \
-  -consumer avformat:output.mkv
+  -consumer avformat:output.webm f=webm vcodec=libvpx acodec=libvorbis crf=15 vb=0 quality=good aq=7 max-intra-rate=1000
