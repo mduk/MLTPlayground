@@ -1,3 +1,14 @@
 #!/bin/bash
 
-melt $HOME/Development/mduk/MLTPlayground/scplay.mlt
+if [[ -z $1 ]]
+then
+  melt $HOME/Development/mduk/MLTPlayground/scplay.mlt
+  exit
+fi
+
+declare tmp="$(mktemp).mlt"
+cat $HOME/Development/mduk/MLTPlayground/scplay.mlt \
+  | sed "s|/home/daniel/Screencasts/latest.nut|$1|" \
+  >"$tmp"
+
+melt "$tmp"
