@@ -99,7 +99,7 @@ case "$param_camera" in
 
 esac
 
-case $param_screen in
+case "$param_screen" in
   scfile)
     screen_producer[mlt_service]='avformat'
     screen_producer[resource]="$param_scfile"
