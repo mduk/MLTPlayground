@@ -72,12 +72,12 @@
     </multitrack>
 
     <!-- Show the frame count in the corner -->
-    <filter>
+    <!--filter>
       <property name="mlt_service">dynamictext</property>
       <property name="fgcolour">white</property>
       <property name="bgcolour">black</property>
       <property name="argument">#frame#</property>
-    </filter>
+    </filter-->
 
     <transition>
       <property name="a_track">0</property>
