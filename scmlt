@@ -46,6 +46,18 @@ tag() {
   fi
 }
 
+output_geometry() {
+  xrandr | sed -nr "
+    /${1} connected/{
+      s/.* ([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+) .*/\1 \2 \3 \4/p;
+      q 0;
+    }
+
+    \${
+      q 1;
+    }"
+}
+
 declare param_mode='play'
 declare param_scfile='/home/daniel/Screencasts/latest.nut'
 declare param_testcard='/home/daniel/Development/mduk/MLTPlayground/testcard.svg'
@@ -101,8 +113,9 @@ case $param_screen in
     ;;
 
   X11:*)
+    read w h x y < <(output_geometry "${param_screen#*:}")
     screen_producer[mlt_service]='avformat'
-    screen_producer[resource]='x11grab::0.0?height=1080&amp;width=1920'
+    screen_producer[resource]="x11grab::0.0+$x,$y?height=$h&amp;width=$w"
     screen_producer[draw_mouse]=1
     ;;
 
