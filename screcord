@@ -12,10 +12,11 @@ declare preferred_camera="$(
 )"
 
 declare -A camera_options=(
-  [power_line_frequency]=2
-  [focus_auto]=0
-  [exposure_auto_priority]=0
-  [white_balance_temperature_auto]=0
+            [power_line_frequency]=1 # 60Hz
+                      [focus_auto]=0 # Off
+                   [exposure_auto]=1 # Manual
+          [exposure_auto_priority]=0 # Off
+  [white_balance_temperature_auto]=0 # Off
 )
 
 declare -ir thread_queue_size=512

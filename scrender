@@ -1,13 +1,32 @@
 #!/bin/bash
 
+declare scfile="$1:-$SCREENCAST_DIR/latest.nut}"
 
-melt $HOME/Development/mduk/MLTPlayground/scrender.mlt \
-  -consumer avformat:output.webm \
-    f=webm \
-    vcodec=libvpx \
-    acodec=libvorbis \
-    crf=15 \
-    vb=0 \
-    quality=good \
-    aq=7 \
-    max-intra-rate=1000
+if [[ -L $scfile ]]
+then scfile="$(readlink $scfile)"
+fi
+
+declare outfile="${scfile%.*}.webm"
+declare tmp="$(mktemp).mlt"
+
+if [[ -f $outfile ]]
+then
+  echo "ERROR: $outfile already exists." >&2
+  exit 1
+fi
+
+scmlt \
+  mode: render \
+  scfile: "$scfile" \
+  >"$tmp"
+
+melt "$tmp" \
+  -consumer "avformat:$scfile" \
+    'f=webm' \
+    'vcodec=libvpx' \
+    'acodec=libvorbis' \
+    'crf=15' \
+    'vb=0' \
+    'quality=good' \
+    'aq=7' \
+    'max-intra-rate=1000'

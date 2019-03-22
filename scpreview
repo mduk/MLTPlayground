@@ -1,19 +1,31 @@
 #!/bin/bash
 
-declare camera="$(
-  for input in /sys/class/video4linux/*
-  do
-    read name < $input/name
-    read path < <(basename $input)
-    echo /dev/$path $name
-  done | sed -n '/[a-z\/]* .*C920/s///p'
-)"
+declare param_camera=''
+declare param_screen=''
+source "$HOME/Development/mduk/BashPlayground/advanced-argument-parser.sh"
+
+if [[ -z $param_camera ]]
+then
+  if find-camera C920 >/dev/null
+  then declare param_camera="$(find-camera C920)"
+  else declare param_camera="$(find-camera Integrated)"
+  fi
+fi
+
+if [[ -z $param_screen ]]
+then
+  if hdmi-connected
+  then declare param_screen='X11:DP-3'
+  else declare param_screen='X11:eDP-1'
+  fi
+fi
 
 declare tmp="$(mktemp).mlt"
 
-sed "s|@camera|$camera|" \
-  <$HOME/Development/mduk/MLTPlayground/scpreview.mlt \
-  >$tmp
+./scmlt \
+  mode: preview \
+  camera: "$param_camera" \
+  screen: "$param_screen" \
+  >"$tmp"
 
-set -x
 melt "$tmp"

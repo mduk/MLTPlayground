@@ -1,14 +1,11 @@
 #!/bin/bash
 
-if [[ -z $1 ]]
-then
-  melt $HOME/Development/mduk/MLTPlayground/scplay.mlt
-  exit
-fi
-
+declare scfile="${1:-$SCREENCAST_DIR/latest.nut}"
 declare tmp="$(mktemp).mlt"
-cat $HOME/Development/mduk/MLTPlayground/scplay.mlt \
-  | sed "s|/home/daniel/Screencasts/latest.nut|$1|" \
+
+./scmlt \
+  mode: play \
+  scfile: "$scfile" \
   >"$tmp"
 
 melt "$tmp"
