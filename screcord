@@ -2,14 +2,7 @@
 
 declare profile="${1:-mp4}"
 declare output=${OUTPUT:-'DP-3'}
-declare preferred_camera="$(
-  for input in /sys/class/video4linux/*
-  do
-    read name < $input/name
-    read path < <(basename $input)
-    echo /dev/$path $name
-  done | sed -n '/[a-z\/]* .*C920/s///p'
-)"
+declare preferred_camera="$(find-camera C920)"
 
 declare -A camera_options=(
             [power_line_frequency]=1 # 60Hz
