@@ -1,24 +1,13 @@
 #!/bin/bash
 
-declare param_camera=''
-declare param_screen=''
+declare param_camera="$(find-camera C920)"
+declare param_camera_rules='-z'
+declare param_screen='X11:DP-3'
 source "$HOME/Development/mduk/BashPlayground/advanced-argument-parser.sh"
 
-if [[ -z $param_camera ]]
-then
-  if find-camera C920 >/dev/null
-  then declare param_camera="$(find-camera C920)"
-  else declare param_camera="$(find-camera Integrated)"
-  fi
-fi
+echo "param_camera: [$param_camera]"
 
-if [[ -z $param_screen ]]
-then
-  if hdmi-connected
-  then declare param_screen='X11:DP-3'
-  else declare param_screen='X11:eDP-1'
-  fi
-fi
+source ./camera-options.sh
 
 declare tmp="$(mktemp).mlt"
 

@@ -33,12 +33,9 @@ read w h x y < <(
   xrandr | sed -nr "
     /${output} connected/{
       s/.* ([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+) .*/\1 \2 \3 \4/p;
-      q 0;
+      q;
     }
-
-    \${
-      q 1;
-    }"
+  "
 )
 
 if [[ $? -gt 0 ]]
@@ -84,19 +81,23 @@ case "$profile" in
     ;;
 esac
 
-################################################################################
-# Here there be Cthulu
-################################################################################
-
+# Configure Camera
 for k in "${!camera_options[@]}"
 do
   declare v="${camera_options[$k]}"
+
+  echo "$camera : setting $k to $v"
 
   if v4l2-ctl -d "$camera" -C "$k" --silent
   then v4l2-ctl -d "$camera" -c "$k=$v" --silent
   else echo "Camera doesn't have option: $k" >&2
   fi
 done
+
+
+################################################################################
+# Here there be Cthulhu
+################################################################################
 
 declare -r tqs="-thread_queue_size ${thread_queue_size}"
 declare -r fr="-framerate ${fps}"
