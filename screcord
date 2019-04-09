@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare profile="${1:-nut}"
+declare profile="${1:-mp4}"
 declare output=${OUTPUT:-'DP-3'}
 declare preferred_camera="$(
   for input in /sys/class/video4linux/*
