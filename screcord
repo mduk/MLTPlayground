@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare profile="${1:-mp4}"
+declare profile="${1:-mk4}"
 declare output=${OUTPUT:-'DP-3'}
 declare camera="$(find-camera C920)"
 
@@ -38,6 +38,12 @@ case "$profile" in
     declare -r vcodec='libx264 -crf 0 -preset ultrafast'
     declare -r acodec='aac'
     declare -r container='mp4'
+    ;;
+
+  mk4)
+    declare -r vcodec='libx264 -crf 0 -preset ultrafast'
+    declare -r acodec='aac'
+    declare -r container='mkv'
     ;;
 
   *)
