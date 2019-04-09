@@ -1,8 +1,8 @@
 #!/bin/bash
 
-declare profile="${1:-mk4}"
-declare output=${OUTPUT:-'DP-3'}
-declare camera="$(find-camera C920)"
+declare -r profile="${1:-mk4}"
+declare -r output=${OUTPUT:-'DP-3'}
+declare -r preferred_camera='C920'
 
 declare -ir thread_queue_size=512
 declare -ir fps=30
@@ -12,6 +12,13 @@ declare -r  filename_format='%Y-%m-%d-%H-%M-%S'
 ################################################################################
 # Here there be Dragons
 ################################################################################
+
+declare camera="$(find-camera "$preferred_camera")"
+if [[ -z $camera ]]
+then
+  echo "Preferred camera not found: $preferred_camera"
+  exit 1
+fi
 
 # Screen geometry
 read w h x y < <(
