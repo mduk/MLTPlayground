@@ -1,13 +1,13 @@
 #!/bin/bash
 
-declare scfile="$1:-$SCREENCAST_DIR/latest.nut}"
+declare scfile="${1:-$SCREENCAST_DIR/latest.lnk}"
 
 if [[ -L $scfile ]]
 then scfile="$(readlink $scfile)"
 fi
 
-declare outfile="${scfile%.*}.webm"
-declare tmp="$(mktemp).mlt"
+declare outfile="${scfile%.*}.render.mp4"
+declare mltfile="${scfile%.*}.render.mlt"
 
 if [[ -f $outfile ]]
 then
@@ -18,15 +18,14 @@ fi
 scmlt \
   mode: render \
   scfile: "$scfile" \
-  >"$tmp"
+  >"$mltfile"
 
-melt "$tmp" \
-  -consumer "avformat:$scfile" \
-    'f=webm' \
-    'vcodec=libvpx' \
-    'acodec=libvorbis' \
-    'crf=15' \
-    'vb=0' \
-    'quality=good' \
-    'aq=7' \
-    'max-intra-rate=1000'
+melt "$mltfile" \
+  -consumer "avformat:$outfile" \
+    properties='x264-medium' \
+    f=mkv \
+    vcodec=libx264 \
+    acodec=aac \
+    g=120 \
+    crf=23 \
+    ab=320k
