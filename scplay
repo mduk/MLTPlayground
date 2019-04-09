@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare scfile="${1:-$SCREENCAST_DIR/latest.nut}"
+declare scfile="${1:-$SCREENCAST_DIR/latest.lnk}"
 declare tmp="$(mktemp).mlt"
 
 ./scmlt \

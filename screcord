@@ -86,7 +86,7 @@ declare -r its="-itsoffset ${delay}"
 declare -r filename="$(date +"$filename_format").${container}"
 declare -r screencast_dir="${SCREENCAST_DIR:-$HOME/Screencasts}"
 declare -r output_file="${screencast_dir}/${filename}"
-declare -r link_file="${screencast_dir}/latest.${container}"
+declare -r link_file="${screencast_dir}/latest.lnk"
 
 set -x
 ffmpeg -y \
