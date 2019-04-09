@@ -2,7 +2,7 @@
 
 declare profile="${1:-mp4}"
 declare output=${OUTPUT:-'DP-3'}
-declare preferred_camera="$(find-camera C920)"
+declare camera="$(find-camera C920)"
 
 declare -ir thread_queue_size=512
 declare -ir fps=30
@@ -23,30 +23,10 @@ read w h x y < <(
   "
 )
 
-if [[ $? -gt 0 ]]
-then
-  echo "Error getting output geometry." >&2
-  exit 1
-fi
-
 echo "Recording output: ${output}"
 echo "      Resolution: ${w}x${h}"
 echo "        Position: ${x}x${y}"
 
-
-# Camera setup
-if [[ -r "$preferred_camera" ]]
-then
-  declare -r camera="$preferred_camera"
-else
-  declare -r camera='/dev/video0'
-  echo "Preferred camera unavailable: ${preferred_camera}"
-fi
-
-echo "Recording Camera: ${camera}"
-
-
-# Output configuration
 case "$profile" in
   nut)
     declare -r vcodec='copy'
