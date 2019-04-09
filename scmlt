@@ -63,7 +63,7 @@ declare param_scfile='/home/daniel/Screencasts/latest.nut'
 declare param_testcard='/home/daniel/Development/mduk/MLTPlayground/testcard.svg'
 declare param_camera='scfile'
 declare param_screen='scfile'
-declare param_gradient_position='0.4'
+declare param_gradient_position='0.35'
 declare param_gradient_width='0.09'
 declare param_gradient_tilt='0.26'
 source $HOME/Development/mduk/BashPlayground/advanced-argument-parser.sh
