@@ -5,9 +5,8 @@ declare param_camera_rules='-z'
 declare param_screen='X11:DP-3'
 source "$HOME/Development/mduk/BashPlayground/advanced-argument-parser.sh"
 
-echo "param_camera: [$param_camera]"
-
-source ./camera-options.sh
+camera="$param_camera" \
+  source ./camera-options.sh
 
 declare tmp="$(mktemp).mlt"
 
