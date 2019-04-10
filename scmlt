@@ -115,7 +115,7 @@ case "$param_screen" in
   X11:*)
     read w h x y < <(output_geometry "${param_screen#*:}")
     screen_producer[mlt_service]='avformat'
-    screen_producer[resource]="x11grab::0.0+$x,$y?height=$h&amp;width=$w"
+    screen_producer[resource]="x11grab::0+$x,$y?height=$h&amp;width=$w"
     screen_producer[draw_mouse]=1
     ;;
 

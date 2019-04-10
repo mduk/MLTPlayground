@@ -76,7 +76,7 @@ declare -r link_file="${screencast_dir}/latest.lnk"
 set -x
 ffmpeg -y \
   $tqs -f v4l2         $fr   -video_size 1920x1080       -input_format mjpeg -i "$camera" \
-  $tqs -f x11grab $its $fr   -video_size "${w}x${h}"                         -i ":0.0+${x},${y}" \
+  $tqs -f x11grab $its $fr   -video_size "${w}x${h}"                         -i ":0+${x},${y}" \
   $tqs -f pulse   $its -ac 2 -name 'Screencast Recorder' -sample_rate 48000  -i default \
   -map 0:v -map 1:v -map 2:a \
   -codec:v $vcodec \
