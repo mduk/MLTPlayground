@@ -50,7 +50,7 @@ In most cases the simplest incantation for "Record Microphone" is unplug-and-rep
 the desired microphone and speak unto the shell:
 
 ```
-ffmpeg -f pulse -i default output.wav
+$ ffmpeg -f pulse -i default output.wav
 ```
 
 Now while that will probably work most of the time, I didn't use the word
@@ -68,6 +68,62 @@ with the following command:
 
 ```
 $ pactl list sources
+... snip ...
+Source #3
+        State: SUSPENDED
+        Name: alsa_input.usb-Burr-Brown_from_TI_USB_Audio_CODEC-00.analog-stereo
+        Description: PCM2902 Audio Codec Analogue Stereo
+        Driver: module-alsa-card.c
+        Sample Specification: s16le 2ch 44100Hz
+        Channel Map: front-left,front-right
+        Owner Module: 25
+        Mute: no
+        Volume: front-left: 65536 / 100% / 0.00 dB,   front-right: 65536 / 100% / 0.00 dB
+                balance 0.00
+        Base Volume: 65536 / 100% / 0.00 dB
+        Monitor of Sink: n/a
+        Latency: 0 usec, configured 0 usec
+        Flags: HARDWARE DECIBEL_VOLUME LATENCY
+        Properties:
+                alsa.resolution_bits = "16"
+                device.api = "alsa"
+                device.class = "sound"
+                alsa.class = "generic"
+                alsa.subclass = "generic-mix"
+                alsa.name = "USB Audio"
+                alsa.id = "USB Audio"
+                alsa.subdevice = "0"
+                alsa.subdevice_name = "subdevice #0"
+                alsa.device = "0"
+                alsa.card = "1"
+                alsa.card_name = "USB Audio CODEC"
+                alsa.long_card_name = "Burr-Brown from TI USB Audio CODEC at usb-0000:00:14.0-1, full speed"
+                alsa.driver_name = "snd_usb_audio"
+                device.bus_path = "pci-0000:00:14.0-usb-0:1:1.0"
+                sysfs.path = "/devices/pci0000:00/0000:00:14.0/usb1/1-1/1-1:1.0/sound/card1"
+                udev.id = "usb-Burr-Brown_from_TI_USB_Audio_CODEC-00"
+                device.bus = "usb"
+                device.vendor.id = "08bb"
+                device.vendor.name = "Texas Instruments"
+                device.product.id = "2902"
+                device.product.name = "PCM2902 Audio Codec"
+                device.serial = "Burr-Brown_from_TI_USB_Audio_CODEC"
+                device.string = "front:1"
+                device.buffering.buffer_size = "352800"
+                device.buffering.fragment_size = "176400"
+                device.access_mode = "mmap+timer"
+                device.profile.name = "analog-stereo"
+                device.profile.description = "Analogue Stereo"
+                device.description = "PCM2902 Audio Codec Analogue Stereo"
+                alsa.mixer_name = "USB Mixer"
+                alsa.components = "USB08bb:2902"
+                module-udev-detect.discovered = "1"
+                device.icon_name = "audio-card-usb"
+        Ports:
+                analog-input: Analogue Input (priority: 10000)
+        Active Port: analog-input
+        Formats:
+                pcm
 ```
 
 As you can see, that command produces a lot of detailed output about each source,
@@ -76,6 +132,10 @@ more succinct output with:
 
 ```
 $ pactl list short sources | column -t
+0  alsa_output.pci-0000_00_1f.3.analog-stereo.monitor                           module-alsa-card.c  s16le  2ch  44100Hz  SUSPENDED
+1  alsa_input.pci-0000_00_1f.3.analog-stereo                                    module-alsa-card.c  s16le  2ch  44100Hz  SUSPENDED
+2  alsa_output.usb-Burr-Brown_from_TI_USB_Audio_CODEC-00.analog-stereo.monitor  module-alsa-card.c  s16le  2ch  44100Hz  IDLE
+3  alsa_input.usb-Burr-Brown_from_TI_USB_Audio_CODEC-00.analog-stereo           module-alsa-card.c  s16le  2ch  44100Hz  SUSPENDED
 ```
 
 That command will output only one line per source with the source ID, name, what
