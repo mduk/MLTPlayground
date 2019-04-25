@@ -67,7 +67,7 @@
     with the following command:
 
     ```
-    pactl list sources
+    $ pactl list sources
     ```
 
     As you can see, that command produces a lot of detailed output about each source,
@@ -75,7 +75,7 @@
     more succinct output with:
 
     ```
-    pactl list short sources | column -t
+    $ pactl list short sources | column -t
     ```
 
     That command will output only one line per source with the source ID, name, what
@@ -98,21 +98,21 @@
     So our record command now looks like:
 
     ```
-    ffmpeg \
-      -f pulse \
-      -i alsa_input.usb-Burr-Brown_from_TI_USB_Audio_CODEC-00.analog-stereo \
-      output.wav
+    $ ffmpeg \
+        -f pulse \
+        -i alsa_input.usb-Burr-Brown_from_TI_USB_Audio_CODEC-00.analog-stereo \
+        output.wav
     ```
 
     You can of course choose to transcode the audio at this point if you wish by adding a `-codec:a`
     parameter and altering the output file name, like so:
 
     ```
-    ffmpeg \
-      -f pulse i \
-      -i alsa_input.usb-Burr-Brown_from_TI_USB_Audio_CODEC-00.analog-stereo \
-      -codec:a aac \
-      output.m4a
+    $ ffmpeg \
+        -f pulse i \
+        -i alsa_input.usb-Burr-Brown_from_TI_USB_Audio_CODEC-00.analog-stereo \
+        -codec:a aac \
+        output.m4a
     ```
 
     Personally, I prefer to record raw, then transcode later as it minimises any background fan noise
@@ -134,7 +134,7 @@
   [Invert monitors so that this records blackness]
 
   ```
-  ffmpeg -f x11grab -i :0 -codec copy output.nut
+  $ ffmpeg -f x11grab -i :0 -codec copy output.nut
   ```
 
   So that didn't work. We got a tiny little blank video. The problem here is that your
@@ -153,7 +153,9 @@
   `-video_size 1920x1080` arguments.
 
   ```
-  ffmpeg -f x11grab -video_size "${w}x${h}" -i  ":0" -codec copy output.nut
+  $ ffmpeg \
+      -f x11grab -video_size "${w}x${h}" -i ":0" \
+      -codec copy output.nut
   ```
 
   The video is still offset from the top left corner and so everything is shifted over
@@ -161,11 +163,81 @@
   be, and that's part of the input specifier.
 
   ```
-  ffmpeg -f x11grab -video_size "${w}x${h}" -i ":0+0,0" -codec copy output.nut
+  $ ffmpeg \
+      -f x11grab -video_size "${w}x${h}" -i ":0+0,0" \
+      -codec copy output.nut
   ```
 
   By adding the `+0,0` we just reset the origin point to the very top leftmost point on
-  the screen.
+  the screen. Depending on your monitor configuration, that might be enough. If you want
+  to record the top leftmost 1080 monitor, then that'll do, but we can do better.
+
+  Instead, let's pick a monitor to record and be very explicit about it's size and
+  position when we record it. That way, if we change the resolution of the monitor, our
+  recordings will match, if we move the monitor to the other side of the desk, the
+  recorder will still find it.
+
+  We can find our monitor's geometry using the xrandr command. Xrandr will list out all
+  the display outputs on your system, including some that your chipset has, but your OEM
+  hasn't brought out to actual sockets. It will show you the connected/disconnected status
+  what the current modes are for your monitors along with a list of what modes they
+  support.
+
+  The following command will list out all our connected displays and their geometries.
+
+  ```
+  $ xrandr | sed -n '/ connected/p'
+  eDP-1 connected primary 2560x1440+3840+720 (normal left inverted right x axis y axis) 344mm x 194mm
+  DP-3 connected 3840x2160+0+0 (normal left inverted right x axis y axis) 621mm x 341mm
+  ```
+
+  The bit we're interested in is the `2560x1440+3840+720` part. The first part of this is
+  the resolution in `WIDTHxHEIGHT` format, the origin offset is the `+XPOSITION+YPOSITION`
+  part. This geometry is the only bit we're interested in so let's just extract that part.
+
+  ```
+  $ xrandr | sed -nr '/ connected/s/.* ([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+) .*/\1 \2 \3 \4/p'
+  2560 1440 3840 720
+  3840 2160 0 0
+  ```
+
+  We now have all our display geometries but since we only wanted one, so let's just add
+  the output name into the regex.
+
+  ```
+  $ xrandr | sed -nr '/DP-3 connected/s/.* ([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+) .*/\1 \2 \3 \4/p'
+  3840 2160 0 0
+  ```
+
+  Those values can now easily be read into Bash variables using the `read` command.
+
+  ```
+  $ read width height xposition yposition < <(
+      xrandr | sed -nr '/DP-3 connected/s/.* ([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+) .*/\1 \2 \3 \4/p'
+    )
+  $ echo "Resolution: ${width}x${height} Position: ${xposition}x${yposition}"
+  Resolution: 3840x2160 Position: 0x0
+  ```
+
+  Once we have those values in variables, putting them into the original command is pretty
+  trivial.
+
+  ```
+  $ ffmpeg \
+      -f x11grab -video_size "${width}x${height}" -i ":0+${xposition},${yposition}" \
+      -codec copy output.nut
+  ```
+
+  And all together...
+
+  ```
+  $ read width height xposition yposition < <(
+      xrandr | sed -nr '/DP-3 connected/s/.* ([0-9]+)x([0-9]+)\+([0-9]+)\+([0-9]+) .*/\1 \2 \3 \4/p'
+    )
+  $ ffmpeg \
+      -f x11grab -video_size "${width}x${height}" -i ":0+${xposition},${yposition}" \
+      -codec copy output.nut
+  ```
 
 
   - ffmpeg -f x11grab -video_size "${w}x${h}" -i ":0+${x},${y}" -codec copy output.nut
