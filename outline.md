@@ -297,22 +297,25 @@ $ read width height xposition yposition < <(
 $ ffmpeg \
   -f x11grab -video_size "${width}x${height}" -i ":0+${xposition},${yposition}" \
   -codec copy output.nut
-  ```
+```
 
+I'll stop short of trying to make this a "one-liner" since it would conflate getting the
+output geometry with the construction of the ffmpeg command. It can be done, but it
+wouldn't be pretty and would only serve to confuse.
 
-  - ffmpeg -f x11grab -video_size "${w}x${h}" -i ":0+${x},${y}" -codec copy output.nut
-    - What is a nut file? Why can't it be a mkv?
-      - https://ffmpeg.org/nut.html
-      - Matroska doesn't like the BGR pixel format that x11grab provides
-      - Video would need to be transcoded
-      - NUT files are extremely accomodating. If FFmpeg can read it, NUT can store it (I think?)
-    - What is a :0+x,y and why do we have to say what size it is?
-      - ffmpeg -f x11grab -i :0
-        - 640x480 in the top-left corner of the X bounding box
-      - ffmpeg -f x11grab -video_size 1920x1080 -i :0
-        - HD1080 in the top-left corner of the X display
-      - ffmpeg -f x11grab -video_size 1920x1080 -1 :0+200,200
-        - HD1080 offset 200x200 pixels from the top-left corner of the X display
+Before I wrap this up, let's quickly address the elephant in the room. What on earth is a
+NUT file? Personally, I rather like the Matroska container format, it's very accomodating
+and can be read while it's being written, which is the killer feature over mp4 containers
+for me. Unfortunately, as accomodating as Matroska is, it doesn't like the BGR pixel
+format that `x11grab` returns.
+
+For every pixel there is a Red value, a Blue value, and a Green value and they appear in a
+particular order depending on the format. Some formats will be RGB, some are BGR and that
+is only the tip of an iceberg that I'm not going to get into here.
+
+NUT is a container format developed by the FFmpeg and Mplayer teams and is _even more_
+accomodating than Matroska, though maybe not as widely supported. NUT is happy to accept
+the raw frames from x11 with their BRG pixel format.
 
 # Recording a Webcam on Linux using FFmpeg (Video4Linux2)
   - ffmpeg -f v4l2 -i /dev/video0 -codec copy output.mkv
