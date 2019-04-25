@@ -185,8 +185,8 @@ unixes is X11.  X11 is another client-server architecture, whereby your computer
 it's graphics hardware is the server and each application that wants to draw a window
 onto the screen is a client that connects to the server and instructs it on how to draw
 what it wants. The drawable space available is what X calls the display, and typically
-that display is ":0". If you have more than one physical monitor, then that screen is
-all of them together.
+that display is ":0". If you have more than one physical monitor, then that
+display is all of them together.
 
 FFmpeg has an X11 client module called x11grab that we can use to connect to our X
 server and request frames from it.
