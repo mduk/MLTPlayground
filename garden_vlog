@@ -107,12 +107,9 @@ do
   )
 
   case "$day" in
-    11) declare th='th' ;;
-    12) declare th='th' ;;
-    13) declare th='th' ;;
+    11|12|13) declare th='th' ;;
     *)
-      declare seconddigit="$(sed 's/^[0-9]//' <<<"$day")"
-      case "$seconddigit" in
+      case "$(sed 's/^[0-9]//' <<<"$day")" in
         1) declare th='st' ;;
         2) declare th='nd' ;;
         3) declare th='rd' ;;
