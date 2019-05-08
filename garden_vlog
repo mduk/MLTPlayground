@@ -65,7 +65,6 @@ tag profile \
   @frame_rate_num 25 \
   @colorspace 709 \
   @sample_aspect_den 1 \
-  @description "blah" \
   @progressive 1 \
   @sample_aspect_num 1
 
@@ -108,10 +107,18 @@ do
   )
 
   case "$day" in
-    1) declare th='st' ;;
-    2) declare th='nd' ;;
-    3) declare th='rd' ;;
-    *) declare th='th' ;;
+    11) declare th='th' ;;
+    12) declare th='th' ;;
+    13) declare th='th' ;;
+    *)
+      declare seconddigit="$(sed 's/^[0-9]//' <<<"$day")"
+      case "$seconddigit" in
+        1) declare th='st' ;;
+        2) declare th='nd' ;;
+        3) declare th='rd' ;;
+        *) declare th='th' ;;
+      esac
+      ;;
   esac
 
   if [[ $clipdate != $lastdate ]]
